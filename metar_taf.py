@@ -591,3 +591,31 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+
+
+
+schedulary.py
+
+
+
+import schedule
+import time
+import asyncio
+
+#from main import main   
+from metar_taf import main
+# Run job
+def job():
+    print("Running METAR comparison...")
+    asyncio.run(main())
+
+# Schedule every 30 mins
+schedule.every(2).minutes.do(job)
+
+print("Scheduler started... runs every 30 minutes ✅")
+
+# Keep running forever
+while True:
+    schedule.run_pending()
+    time.sleep(1)
