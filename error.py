@@ -95,3 +95,21 @@ def parse_user_query(user_text: str):
     prompt = PROMPT_TEMPLATE.format(system=PROMPT_SYSTEM, user=user_text)
     raw = call_azure_chat(prompt)
     return parse_llm_json(raw)
+
+
+
+
+
+
+
+
+
+
+
+
+(venv) C:\Users\Krishna.x.Jaiswal\Downloads\flight_mcp_package>python client_mcp.py
+🛫 MCP Client (LLM-driven) — type exit to quit
+You: Give me all flights which are diverted to AMD 
+-> Calling tool: search_flight_data with args: {"diverted_to": "AMD"}
+[Server call error] HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=30)
+You: 
