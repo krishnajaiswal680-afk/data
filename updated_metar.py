@@ -1,17 +1,19 @@
+metar_taf.py
+
+
+# metar_taf.py
 import asyncio
 import json
 import os
 import re
-import time
-import schedule
 from datetime import datetime, timezone
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from playwright.async_api import async_playwright
 
-# ==============================================================
-# 🧩 STEP 1 — Parse METAR and TAF from raw text
-# ==============================================================
+# ============================================================== 
+# 🧩 Parse METAR and TAF from raw text
+# ============================================================== 
 def parse_metars_tafs(text: str) -> dict:
     text = text.replace('\xa0', ' ').replace('\u200b', '')
     data = {}
@@ -41,11 +43,10 @@ def parse_metars_tafs(text: str) -> dict:
     return data
 
 
-# ==============================================================
-# 🌐 STEP 2 — Scrape one URL
-# ==============================================================
+# ============================================================== 
+# 🌐 Scrape one URL
+# ============================================================== 
 async def scrape_url(url: str) -> dict:
-    print(f"🌍 Scraping: {url}")
     source_label = urlparse(url).netloc.replace('.', '_')
     try:
         async with async_playwright() as p:
@@ -67,9 +68,9 @@ async def scrape_url(url: str) -> dict:
     return {source_label: parsed}
 
 
-# ==============================================================
-# ⚙️ STEP 3 — Classify data consistency
-# ==============================================================
+# ============================================================== 
+# ⚙️ Classify data consistency
+# ============================================================== 
 def classify_status(base_value, comparisons):
     values = [v for v in comparisons.values() if v]
     if base_value is None:
@@ -83,9 +84,9 @@ def classify_status(base_value, comparisons):
     return "no_match"
 
 
-# ==============================================================
-# 🔁 STEP 4 — Scrape all URLs and combine results
-# ==============================================================
+# ============================================================== 
+# 🔁 Scrape all URLs and combine results
+# ============================================================== 
 async def scrape_all(sources_file="metar.txt"):
     with open(sources_file, "r", encoding="utf-8") as f:
         lines = [line.strip() for line in f if line.strip()]
@@ -98,9 +99,6 @@ async def scrape_all(sources_file="metar.txt"):
             base_taf_url = line.split("=", 1)[1].strip()
         else:
             urls.append(line)
-
-    print(f"\n🌐 Base METAR URL: {base_metar_url}")
-    print(f"🌐 Base TAF URL:   {base_taf_url}\n")
 
     base_metar_data = await scrape_url(base_metar_url)
     base_taf_data = await scrape_url(base_taf_url)
@@ -131,13 +129,12 @@ async def scrape_all(sources_file="metar.txt"):
     return combined
 
 
-# ==============================================================
-# 💾 STEP 5 — Save data (append mode)
-# ==============================================================
+# ============================================================== 
+# 💾 Save data (append mode)
+# ============================================================== 
 def append_results(data: dict):
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    # Prepare new entry
     metar_data = {
         "timestamp": timestamp,
         "data": {stn: info["METAR"] for stn, info in data.items()},
@@ -147,7 +144,6 @@ def append_results(data: dict):
         "data": {stn: info["TAF"] for stn, info in data.items()},
     }
 
-    # Append to existing JSON file
     for filename, new_entry in [("metar.json", metar_data), ("taf.json", taf_data)]:
         if os.path.exists(filename):
             with open(filename, "r", encoding="utf-8") as f:
@@ -168,9 +164,9 @@ def append_results(data: dict):
     print(f"✅ [{timestamp}] Appended new data → metar.json & taf.json")
 
 
-# ==============================================================
-# 🕒 STEP 6 — Scheduled Run
-# ==============================================================
+# ============================================================== 
+# 🔹 Run scraper directly (optional)
+# ============================================================== 
 async def run_scraper():
     print("\n🕒 Scraping started...\n")
     try:
@@ -181,13 +177,40 @@ async def run_scraper():
         print(f"❌ Error in run_scraper(): {e}")
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+scheduler.py
+
+
+
+# scheduler.py
+import asyncio
+import time
+import schedule
+from metar_taf import run_scraper
+
+# ============================================================== 
+# 🕒 Scheduled Run
+# ============================================================== 
 def job():
     asyncio.run(run_scraper())
 
 
-# ==============================================================
-# 🚀 STEP 7 — Main Loop
-# ==============================================================
+# ============================================================== 
+# 🚀 Main Loop
+# ============================================================== 
 if __name__ == "__main__":
     job()  # Run immediately once
     schedule.every(30).minutes.do(job)
@@ -195,3 +218,15 @@ if __name__ == "__main__":
     while True:
         schedule.run_pending()
         time.sleep(1)
+
+
+
+
+metar.txt
+
+BASE_METAR= https://olbs.amsschennai.gov.in/nsweb/FlightBriefing/showmetars.php
+BASE_TAF= https://olbs.amsschennai.gov.in/nsweb/FlightBriefing/showtaffcs.php?_=1521178270337
+
+https://olbs.amssdelhi.gov.in/nsweb/FlightBriefing/showmetars.php?_=152117558531
+https://olbs.amsschennai.gov.in/nsweb/FlightBriefing/showmetars.php?_=1567992921217
+https://amssdelhi.gov.in/Palam1.php
