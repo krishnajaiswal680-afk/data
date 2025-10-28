@@ -1,91 +1,24 @@
-│
-◇  Scaffolding project in C:\Users\Krishna.x.Jaiswal\Downloads\MiRaMCP-main\flightops-chatbot...
-│
-◇  Installing dependencies with npm...
-npm warn EBADENGINE Unsupported engine {
-npm warn EBADENGINE   package: '@vitejs/plugin-react@5.1.0',
-npm warn EBADENGINE   required: { node: '^20.19.0 || >=22.12.0' },
-npm warn EBADENGINE   current: { node: 'v20.14.0', npm: '10.7.0' }
-npm warn EBADENGINE }
-npm warn EBADENGINE Unsupported engine {
-npm warn EBADENGINE   package: 'rolldown-vite@7.1.14',
-npm warn EBADENGINE   required: { node: '^20.19.0 || >=22.12.0' },
-npm warn EBADENGINE   current: { node: 'v20.14.0', npm: '10.7.0' }
-npm warn EBADENGINE }
-npm warn EBADENGINE Unsupported engine {
-npm warn EBADENGINE   package: '@oxc-project/runtime@0.92.0',
-npm warn EBADENGINE   required: { node: '^20.19.0 || >=22.12.0' },
-npm warn EBADENGINE   current: { node: 'v20.14.0', npm: '10.7.0' }
-npm warn EBADENGINE }
-npm warn EBADENGINE Unsupported engine {
-npm warn EBADENGINE   package: 'rolldown@1.0.0-beta.41',
-npm warn EBADENGINE   required: { node: '^20.19.0 || >=22.12.0' },
-npm warn EBADENGINE   current: { node: 'v20.14.0', npm: '10.7.0' }
-npm warn EBADENGINE }
+(venv) C:\Users\Krishna.x.Jaiswal\Downloads\MiRaMCP-main\flightops-chatbot>npm install -D tailwindcss postcss autoprefixer
 
-added 194 packages, and audited 195 packages in 34s
+up to date, audited 294 packages in 6s
 
-50 packages are looking for funding
+119 packages are looking for funding
   run `npm fund` for details
 
-found 0 vulnerabilities
-│
-◇  Starting dev server...
+2 vulnerabilities (1 moderate, 1 high)
 
-> flightops-chatbot@0.0.0 dev
-> vite
+To address all issues, run:
+  npm audit fix --force
 
-You are using Node.js 20.14.0. Vite requires Node.js version 20.19+ or 22.12+. Please upgrade your Node.js version.
-(node:29324) ExperimentalWarning: WASI is an experimental feature and might change at any time
-(Use `node --trace-warnings ...` to show where the warning was created)
-file:///C:/Users/Krishna.x.Jaiswal/Downloads/MiRaMCP-main/flightops-chatbot/node_modules/rolldown/dist/shared/parse-ast-index-D2PcAmXE.mjs:10703
-        if (loadErrors.length > 0) throw new Error("Cannot find native binding. npm has a bug related to optional dependencies (https://github.com/npm/cli/issues/4828). Please try `npm i` again after removing both package-lock.json and node_modules directory.", { cause: loadErrors.reduce((err, cur) => {
-                                         ^
+Run `npm audit` for details.
 
-Error: Cannot find native binding. npm has a bug related to optional dependencies (https://github.com/npm/cli/issues/4828). Please try `npm i` again after removing both package-lock.json and node_modules directory.
-    at file:///C:/Users/Krishna.x.Jaiswal/Downloads/MiRaMCP-main/flightops-chatbot/node_modules/rolldown/dist/shared/parse-ast-index-D2PcAmXE.mjs:10703:35
-    at ModuleJob.run (node:internal/modules/esm/module_job:222:25)
-    at async ModuleLoader.import (node:internal/modules/esm/loader:316:24)
-    at async CAC.<anonymous> (file:///C:/Users/Krishna.x.Jaiswal/Downloads/MiRaMCP-main/flightops-chatbot/node_modules/vite/dist/node/cli.js:571:27) {
-  [cause]: Error: Cannot find module '@rolldown/binding-win32-x64-msvc'
-  Require stack:
-  - C:\Users\Krishna.x.Jaiswal\Downloads\MiRaMCP-main\flightops-chatbot\node_modules\rolldown\dist\shared\parse-ast-index-D2PcAmXE.mjs
-      at Module._resolveFilename (node:internal/modules/cjs/loader:1145:15)
-      ... 2 lines matching cause stack trace ...
-      at require (node:internal/modules/helpers:179:18)
-      at requireNative (file:///C:/Users/Krishna.x.Jaiswal/Downloads/MiRaMCP-main/flightops-chatbot/node_modules/rolldown/dist/shared/parse-ast-index-D2PcAmXE.mjs:10345:20)
-      at file:///C:/Users/Krishna.x.Jaiswal/Downloads/MiRaMCP-main/flightops-chatbot/node_modules/rolldown/dist/shared/parse-ast-index-D2PcAmXE.mjs:10672:17
-      at ModuleJob.run (node:internal/modules/esm/module_job:222:25)
-      at async ModuleLoader.import (node:internal/modules/esm/loader:316:24)
-      at async CAC.<anonymous> (file:///C:/Users/Krishna.x.Jaiswal/Downloads/MiRaMCP-main/flightops-chatbot/node_modules/vite/dist/node/cli.js:571:27) {
-    code: 'MODULE_NOT_FOUND',
-    requireStack: [
-      'C:\\Users\\Krishna.x.Jaiswal\\Downloads\\MiRaMCP-main\\flightops-chatbot\\node_modules\\rolldown\\dist\\shared\\parse-ast-index-D2PcAmXE.mjs'
-    ],
-    cause: Error: Cannot find module '../rolldown-binding.win32-x64-msvc.node'
-    Require stack:
-    - C:\Users\Krishna.x.Jaiswal\Downloads\MiRaMCP-main\flightops-chatbot\node_modules\rolldown\dist\shared\parse-ast-index-D2PcAmXE.mjs
-        at Module._resolveFilename (node:internal/modules/cjs/loader:1145:15)
-        at Module._load (node:internal/modules/cjs/loader:986:27)
-        at Module.require (node:internal/modules/cjs/loader:1233:19)
-        at require (node:internal/modules/helpers:179:18)
-        at requireNative (file:///C:/Users/Krishna.x.Jaiswal/Downloads/MiRaMCP-main/flightops-chatbot/node_modules/rolldown/dist/shared/parse-ast-index-D2PcAmXE.mjs:10340:11)
-        at file:///C:/Users/Krishna.x.Jaiswal/Downloads/MiRaMCP-main/flightops-chatbot/node_modules/rolldown/dist/shared/parse-ast-index-D2PcAmXE.mjs:10672:17
-        at ModuleJob.run (node:internal/modules/esm/module_job:222:25)
-        at async ModuleLoader.import (node:internal/modules/esm/loader:316:24)
-        at async CAC.<anonymous> (file:///C:/Users/Krishna.x.Jaiswal/Downloads/MiRaMCP-main/flightops-chatbot/node_modules/vite/dist/node/cli.js:571:27) {
-      code: 'MODULE_NOT_FOUND',
-      requireStack: [
-        'C:\\Users\\Krishna.x.Jaiswal\\Downloads\\MiRaMCP-main\\flightops-chatbot\\node_modules\\rolldown\\dist\\shared\\parse-ast-index-D2PcAmXE.mjs'
-      ]
-    }
-  }
-}
+(venv) C:\Users\Krishna.x.Jaiswal\Downloads\MiRaMCP-main\flightops-chatbot>npm -v
+10.7.0
 
-Node.js v20.14.0
-npm error code 1
-npm error path C:\Users\Krishna.x.Jaiswal\Downloads\MiRaMCP-main
-npm error command failed
-npm error command C:\WINDOWS\system32\cmd.exe /d /s /c create-vite flightops-chatbot --template react-ts
+(venv) C:\Users\Krishna.x.Jaiswal\Downloads\MiRaMCP-main\flightops-chatbot>npx -v
+10.7.0
 
-npm error A complete log of this run can be found in: C:\Users\Krishna.x.Jaiswal\AppData\Local\npm-cache\_logs\2025-10-28T10_14_59_980Z-debug-0.log
+(venv) C:\Users\Krishna.x.Jaiswal\Downloads\MiRaMCP-main\flightops-chatbot>npx tailwindcss -v
+npm error could not determine executable to run
+
+npm error A complete log of this run can be found in: C:\Users\Krishna.x.Jaiswal\AppData\Local\npm-cache\_logs\2025-10-28T10_57_37_491Z-debug-0.log
