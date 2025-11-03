@@ -645,8 +645,27 @@ print("Inserted id:", res.inserted_id)
 
 
 
-(venv) C:\Users\Krishna.x.Jaiswal\Downloads\MiRaMIN-main\MiRaMIN-main>python seed_mongo.py
-C:\Users\Krishna.x.Jaiswal\Downloads\MiRaMIN-main\MiRaMIN-main\seed_mongo.py:38: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-  "ingestedAt": datetime.utcnow()
-Inserted id: 69084153129e584c9a554d19
+(venv) C:\Users\Krishna.x.Jaiswal\Downloads\MiRaMIN-main\MiRaMIN-main>streamlit run app.py
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://10.35.8.155:8501
+
+INFO:FlightOps.MCPClient:Connecting to MCP server at http://127.0.0.1:8000/mcp
+INFO:httpx:HTTP Request: POST http://127.0.0.1:8000/mcp "HTTP/1.1 200 OK"
+INFO:mcp.client.streamable_http:Received session ID: 134195ea61a847eba804b42c581a0a77
+INFO:mcp.client.streamable_http:Negotiated protocol version: 2025-06-18
+INFO:FlightOps.MCPClient:Connected to MCP server
+INFO:FlightOps.MCPClient:User query: Why was flight 6E215 delayed on June 23, 2024?
+INFO:httpx:HTTP Request: POST https://6e-openai-sandbox-aops.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+INFO:FlightOps.MCPClient:Calling tool: get_delay_summary with args: {}
+INFO:httpx:HTTP Request: POST http://127.0.0.1:8000/mcp "HTTP/1.1 202 Accepted"
+INFO:httpx:HTTP Request: GET http://127.0.0.1:8000/mcp "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://127.0.0.1:8000/mcp "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://6e-openai-sandbox-aops.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+
+
+
+Json Parse Error: Unexpected token 'U', "Unknown to"... is not valid JSON ← here
 
