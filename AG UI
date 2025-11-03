@@ -638,3 +638,15 @@ doc = {
 res = col.insert_one(doc)
 print("Inserted id:", res.inserted_id)
 
+
+
+
+
+
+
+
+(venv) C:\Users\Krishna.x.Jaiswal\Downloads\MiRaMIN-main\MiRaMIN-main>python seed_mongo.py
+C:\Users\Krishna.x.Jaiswal\Downloads\MiRaMIN-main\MiRaMIN-main\seed_mongo.py:38: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  "ingestedAt": datetime.utcnow()
+Inserted id: 69084153129e584c9a554d19
+
