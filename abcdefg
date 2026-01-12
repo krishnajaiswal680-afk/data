@@ -1,0 +1,375 @@
+Problem Statement# 09
+DRAFT#1.0
+Business Area: OCC
+Time-Aware Modeling of Standby Activation Rates
+Across Duty Windows
+
+Abstract
+Standby crew planning requires balancing operational resilience with the cost of
+underutilised standby capacity. We propose a time-aware, rate-based framework
+to predict standby activation rates across fixed four-hour duty windows by station
+and crew rank (CP/FO). Activation is modeled as a propensity (activations divided
+by planned pairings) and implemented as an autoregressive model with exogenous
+variables (ARX-style) regression using operational context features augmented
+with lagged rates and rolling averages. Across three feature configurations and four
+regression models, results on a time-aware holdout month show that sparse temporal
+anchors (D−1 and D−7) capture most predictive signal, while adding intermediate
+lags and long rolling windows degrades generalisation under limited POC data. A
+parsimonious configuration using D−1, D−7, and a 7-day rolling baseline achieves
+near-best accuracy with higher interpretability and maintainability, making it the
+preferred candidate for scale-out.
+1 Objective and Operational Context
+Standby crew planning is a critical component of airline operations, ensuring robustness against
+uncertainties such as crew sickness, misconnects, and cascading delays. While standby resources
+provide operational resilience, they also incur cost when underutilised. The central planning challenge
+lies in balancing these competing objectives.
+The goal of this study is to predict the standby activation rate associated with a set of planned
+pairings, segmented by station, crew rank, and fixed four-hour duty windows throughout the day:
+[0–4), [4–8),[8–12),[12–16),[16–20),[20–24)
+Predictions are generated separately for Captains (CP) and First Officers (FO), recognising that
+operational exposure and activation behaviour differ by rank. Rather than predicting the absolute
+number of standby activations, the problem is formulated as a rate prediction task, allowing the
+model to generalise across varying operational scales.
+2 DataDescription
+The proof-of-concept uses three months of historical data spanning July to September 2025. The data
+is aggregated at a daily level for each station, duty window, and crew rank. For every aggregation,
+two operational quantities are observed: the number of planned pairing starts and the number of
+standby activations.
+An illustrative sample is shown in Table 1.
+IndiGo Restricted
+IndiGo Restricted
+Page 1 of 11
+Table1: Illustrativesampleofaggregatedstandbyactivationdata
+Date Station DutyWindow WindowNo. Rank Pairings Activations
+01/07/25 DEL 0–4 1 CP 3 2
+01/07/25 DEL 0–4 1 FO 5 2
+01/07/25 DEL 4–8 2 CP 49 21
+01/07/25 DEL 4–8 2 FO 47 18
+01/07/25 DEL 8–12 3 CP 38 11
+01/07/25 DEL 8–12 3 FO 34 16
+01/07/25 DEL 12–16 4 CP 40 10
+01/07/25 DEL 12–16 4 FO 27 7
+01/07/25 DEL 16–20 5 CP 38 4
+01/07/25 DEL 16–20 5 FO 37 7
+01/07/25 DEL 20–24 6 CP 30 8
+01/07/25 DEL 20–24 6 FO 13 5
+Thetargetvariableisdefinedas:
+yt=StandbyActivationCountt
+PlannedPairingCountt
+Thisdefinitionfocusesthemodelingeffortonactivationpropensityratherthanabsolutevolume.
+Weobservedthatapproximately95%ofthedatapointshaveanactivationratelessthanorequalto
+0.5.Asaresult,thetrainingdataisheavilyconcentratedaroundmoderateactivationlevels,which
+limitsthemodel’sexposuretoextremeoredge-casescenarios.
+3 Time-SeriesInterpretation
+Althoughregressionmodelsareused,theproblemisinherentlytemporalinnature.Forafixedstation,
+dutywindow,andcrewrank,theactivationrateformsatimeseries:
+{y1,y2,...,yT}
+Operationaldisruptionstendtopersistacrossdaysduetorecoverybacklogs,crewconstraints,and
+systemicstress.Consequently,theactivationrateonagivendayisinfluencedbybothconcurrent
+conditionsandrecenthistory.
+Conceptually,theprocesscanbeexpressedas:
+yt=f(Xt,yt−1,yt−2,...)+εt
+whereXtrepresentsoperationalcontextfeaturesandεtcapturesunobservedshocks.Thisstructure
+isanalogoustoanautoregressivemodelwithexogenousvariables(ARX),implementedherethrough
+regressionmodelsaugmentedwithlaggedandrollinghistoricalfeatures.
+4 FeatureEngineering
+Featuredesignisstructuredaroundthreecomplementarydimensions:currentoperationalcontext,
+short-termtemporaldependence,andlonger-termhistoricaltrends.
+4.1 OperationalContextFeatures
+Thesefeaturesdescribetheconditionsunderwhichadutyisscheduled.Calendarattributessuchas
+dayofweek,weekendindicator,month,andweekofyearcaptureweeklyandseasonaleffects.Duty
+timingisrepresentedthroughdutywindownumber,starthour,andendhour,withexplicitindicators
+forearlymorning(0–4AM)andlatenight(20–24)windows,whichareknowntoexhibithigher
+operationalfragility.
+CrewrankisencodedtodifferentiateCPandFObehaviour.Plannedpairingcountisincludedas
+acontextualsignaltoallowthemodeltolearnscale-relatednon-linearities,eventhoughthetarget
+itselfisrate-based.
+ Page2of11
+4.2 Lagged Activation Rate Features
+To capture short-term persistence, activation rates from the previous seven days are included:
+ACT_RATE_LAGk = yt−k, k = 1,...,7
+These features allow the model to learn sustained disruption periods as well as recovery dynamics.
+4.3 Rolling Average Features
+Lagged values can be noisy, particularly for low-volume windows. Rolling averages over 7, 15,
+30, and 60 days are therefore constructed to provide smoothed historical context. Shorter windows
+emphasise recency, while longer windows capture stable baseline behaviour, allowing the model to
+balance responsiveness and robustness.
+5 Experimental Design
+Three experiments were conducted to evaluate different trade-offs between temporal depth, smooth
+ness, and complexity.
+Experiment 1 uses all operational context features, lagged activation rates at D−1 and D−7, and all
+rolling averages (7, 15, 30, and 60 days).
+Experiment 2 includes all operational context features, the full set of lagged activation rates from
+D−1toD−7,androlling averages over 15, 30, and 60 days.
+Experiment 3 adopts a parsimonious approach, using all operational context features, only D−1 and
+D−7lags, and a single 7-day rolling average.
+6 Modeling Approaches
+Multiple regression models were evaluated.
+Linear regression serves as a transparent baseline. Ridge regression introduces ℓ2 regularisation to
+stabilise estimates under correlated temporal features. Random Forest models capture non-linear
+interactions without strong parametric assumptions. XGBoost further enhances this by learning
+sequential corrections, making it effective in capturing conditional interactions between time-of-day,
+rank, and historical activation patterns.
+7 Train–Test Strategy
+Atime-aware split is used to avoid information leakage. Two months of data are used for training,
+while the subsequent month is held out for testing. This mirrors real-world deployment, where models
+trained on historical data are applied to future schedules.
+8 Evaluation Metrics
+Model performance is assessed using both accuracy-oriented and risk-sensitive metrics. All metrics
+are computed on the held-out test month at the station–window–rank level. Here, ˆy is predicted and y
+is actual value.
+Mean Absolute Error (MAE) measures the average magnitude of prediction errors:
+MAE=E[|ˆy−y|]
+Operationally, an MAE of 0.09 means the predicted activation rate deviates from the observed rate by
+approximately 9 percentage points on average.
+Root Mean Squared Error (RMSE) penalises larger errors more strongly:
+RMSE =
+E[(ˆy − y)2]
+
+Page 3 of 11
+LowerRMSEindicatesbettercontroloverextrememispredictions,whichmattersduringhigh-stress
+operationalperiods.
+Meanbiasmeasuressystematicover-orunder-prediction:
+MeanBias=E[ˆy−y]
+Apositivevalue impliesslightover-predictiononaverage,whilevaluescloser tozerosuggest
+balancedbehaviour.
+Under-predictionratemeasureshowfrequentlythemodelunderestimatesactivation:
+Under-PredictionRate= #{ˆy<y}
+TotalTestObservations
+Thisisoperationallyimportantbecauseunder-predictioncorrespondstoscenarioswhereinsufficient
+standbycapacitymaybeplanned.
+9 Results
+Thissectioncomparesthethreefeatureconfigurationsandthefourregressionmodelsontheheld-out
+testmonth.Theemphasisison(i)predictiveaccuracy(MAE,RMSE)and(ii)operationalrisksignals
+(biasandunder-predictionrate).Definitionsofexperimentsandfeaturesareprovidedearlier;here
+wefocusonwhattheresultsimply.
+Experiment2underperformsconsistentlyacrossmodelclasses,withhigherMAEandRMSEvalues.
+Thisindicatesthataddingallintermediatelags(D−2toD−6)andlongerrollingwindowsdoesnot
+improvegeneralisationinthecurrentPOCsetting,andlikelyintroducesnoiseorredundancygiven
+thelimitedhistoricalhorizon.
+Experiments1and3deliverthestrongestperformanceoverall.Bothleveragethedominanttemporal
+anchors—recenthistory(D−1)andweeklyperiodicity(D−7)—suggestingthesecapturethecore
+persistencepatternsofstandbyactivation.
+WhileExperiment1achievesthelowestrawerroronthebest-performingmodel,Experiment3is
+selectedasthepreferredconfigurationbecauseitachievescomparableaccuracywithmeaningfully
+lowercomplexity.Byrelyingononlytwolagsandasingle7-dayrollingbaseline,Experiment3is
+easiertoexplain,easiertomaintain,andlesssensitivetosparsityandregimedriftwhenscaledacross
+stationsanddutywindows.
+Table2:ModelPerformanceAcrossExperimentalConfigurations(TestMonth).Valuesroundedto4
+decimals.
+Experiment Model MAE↓ RMSE↓ MeanBias Under-PredRate
+Experiment1
+Linear 0.0883 0.1255 0.0114 0.4250
+Ridge 0.0910 0.1286 0.0204 0.3889
+RF 0.0901 0.1269 0.0057 0.4222
+XGB 0.0955 0.1368-0.0034 0.4806
+Experiment2
+Linear 0.0989 0.1363 0.0353 0.3389
+Ridge 0.0984 0.1380 0.0302 0.3306
+RF 0.1001 0.1433 0.0180 0.3833
+XGB 0.1050 0.1473 0.0243 0.3889
+Experiment3
+Linear 0.0890 0.1258 0.0131 0.4194
+Ridge 0.0891 0.1270 0.0175 0.3889
+RF 0.0908 0.1273 0.0077 0.4417
+XGB 0.0934 0.1311 0.0087 0.4528
+IndiGoRestricted Page4of11
+9.1 Model Choice Considerations
+Across experiments, linear and ridge regression models are highly competitive, often matching or
+outperforming more complex tree-based approaches. This outcome is consistent with the POC
+constraints: limited training history and a feature set dominated by smooth, additive effects.
+However, this should not be interpreted as evidence that linear models are universally superior. With
+more data and richer signals (weather, network stress, crew constraints), non-linear models are
+expected to become increasingly valuable in capturing interaction effects, thresholds, and regime
+shifts. Accordingly, model selection should remain adaptive rather than fixed at the current stage.
+10 Discussion
+Two practical insights emerge from the results:
+First, for standby activation rate prediction at station–window–rank granularity, not all temporal
+features are equally useful. Recent history (D−1) and weekly periodicity (D−7) appear to carry
+most of the learnable temporal signal in this POC. Adding intermediate lags and long rolling windows
+can inflate dimensionality without improving generalisation, particularly when the historical horizon
+is short and operational regimes shift.
+Second, there is a clear trade-off between marginal accuracy gains and deployability. Experiment
+1 achieves the best point estimate on the lowest error model, but Experiment 3 offers nearly the
+same accuracy with a simpler and more robust feature structure. In operational analytics, this
+matters: simpler models are easier to govern, easier to debug, and more stable when rolled out across
+stations with different data volumes. Therefore, selecting Experiment 3 is a deliberate design choice
+prioritising scalable deployment and interpretability while maintaining strong predictive accuracy.
+11 Limitations
+While the proposed modeling framework demonstrates strong performance in the proof-of-concept
+setting, several limitations should be acknowledged to correctly interpret the results.
+The first limitation is the restricted historical horizon. The analysis is based on only three months
+of data. Although sufficient to validate the approach and compare feature configurations, it limits
+exposure to seasonal patterns, rare disruption events, and long-term regime shifts. As a result, the
+learned relationships primarily reflect short-term dynamics and may not fully generalise across peak
+seasons, weather extremes, or structural changes in operations.
+Second, the formulation relies on a coarse level of aggregation. Activation rates are modeled at
+a daily level for each station, duty window, and rank. While this aggregation improves stability
+and interpretability, it masks intra-day variability and does not explicitly capture within-window
+heterogeneity (e.g., early vs late departures within the same 4-hour window).
+Third, the feature set is intentionally conservative and focuses largely on calendar structure, duty
+timing, and historical activation behaviour. Several operational drivers of standby activation are
+not explicitly modeled, including real-time disruptions, weather conditions, and crew availability
+constraints. In the absence of these signals, the model relies on historical persistence as a proxy,
+which may limit responsiveness during sudden shocks.
+Fourth, the current approach treats each station–duty-window–rank combination independently,
+which can lead to data sparsity issues for low-volume segments. No explicit mechanism is currently
+used to share statistical strength across similar stations or time windows.
+Finally, conclusions regarding model choice should be interpreted in the context of data scale. The
+strong performance of linear and ridge regression models is partly a consequence of limited data
+volume and relatively smooth feature effects. Higher-capacity models may not yet realise their full
+potential and should be re-evaluated as data and feature richness increase.
+
+Page 5 of 11
+12 Future Work
+Future work will expand the framework along three dimensions: richer features, alternative modeling
+approaches, and decision-oriented extensions.
+Richer Operational Features
+Akeypriority is the incorporation of disruption-driven and operational stress features that directly
+influence standby activation. Candidate additions include:
+• Weather signals: station-level severe weather flags, forecast uncertainty, seasonal weather
+indices, and visibility/wind-related risk indicators.
+• Network stress indicators: delay propagation metrics, cancellation counts in preceding
+banks, peak period operational load, aircraft rotation tightness, and turnaround buffer
+proxies.
+• Crew availability constraints: leave density, training load, reserve pool utilisation, and
+short-horizon crew shortage indicators by rank and base.
+• Calendar and event enrichments: public holidays, regional festivals/events, school vaca
+tion windows, and known schedule change periods.
+These features are expected to reduce reliance on lag-based proxies and improve responsiveness to
+sudden shocks.
+Alternative Modeling Approaches
+With longer histories and richer features, the modeling approach can evolve beyond independent
+station–window training. Promising directions include:
+• Hierarchical / pooled models to share information across stations and windows, improving
+stability for low-volume segments.
+• Time-series–aware models (e.g., state-space formulations, Generalized Additive Models1
+(GAM) with temporal components) to explicitly separate trend, seasonality, and noise while
+retaining interpretability.
+• Non-linear learners (boosted trees, calibrated ensembles) to capture interaction effects
+between weather, network stress, and crew constraints that are difficult to express linearly.
+Decision-Oriented Extensions
+Beyond prediction, the model can be integrated into downstream planning workflows:
+• Optimisation-ready outputs: combining predicted activation rates with cost functions and
+service-level constraints to recommend standby provisioning by station and time-of-day.
+• Scenario analysis and stress testing: perturbing pairing volume or disruption inputs to
+evaluate robustness under adverse conditions.
+• Monitoring and governance: drift detection by station/window, bias tracking, and periodic
+recalibration to maintain reliability in production.
+Overall, the current framework provides a solid and extensible foundation. As data maturity improves
+and additional signals are incorporated, the approach can evolve from descriptive prediction toward
+proactive, decision-aware standby planning.
+13 Conclusion
+This work formulates standby activation prediction as a time-aware rate modeling problem. By
+combining operational context with autoregressive and smoothed historical signals, the approach
+balances interpretability, robustness, and predictive accuracy.
+
+
+Page 6 of 11
+Across the three experimental configurations, sparse temporal memory anchored on D−1 and D−7
+emerges as the most reliable pattern in the POC setting. Experiment 3 is selected for scale-out
+due to its strong performance coupled with simplicity and maintainability. Future iterations will
+incorporate richer operational features and alternative modeling approaches to improve responsiveness,
+generalisation, and decision usefulness.
+IndiGo Restricted
+Page 7 of 11
+A Experimental Details
+A.1 Feature List Used in the POC
+For completeness, we summarise the engineered features used in the proof-of-concept. Features
+are grouped into (i) operational context, (ii) lagged activation rates, and (iii) rolling averages. All
+lag/rolling features are computed within the same station–duty-window–rank segment to preserve
+interpretability.
+Operational Context Features
+• DAY_OF_WEEK, IS_WEEKEND, MONTH, WEEK_OF_YEAR
+• DUTY_WINDOW_NUMBER, DUTY_START_HOUR, DUTY_END_HOUR
+• IS_EARLY_MORNING (0–4 hrs), IS_LATE_NIGHT (20–24 hrs)
+• RANK_ENCODED
+• PLANNED_PAIRINGS_COUNT
+Lagged Activation Rate Features
+Lagged features represent historical activation rates from D−1 through D−7:
+ACT_RATE_LAGk = yt−k, k ∈ {1,...,7}.
+Rolling Average Features
+Rolling mean activation rates are computed over the following windows:
+ROLL_MEANh = 1
+h 
+h
+j=1
+yt−j, h ∈ {7,15,30,60}.
+A.2 Experiment Configurations
+The three experiments differ only in the temporal features included (lags and rolling windows).
+Operational context features are common across all experiments.
+• Experiment1: Operational context + {D−1,D−7} lags+rolling means over {7,15,30,60}
+days.
+• Experiment 2: Operational context + {D−1,...,D−7} lags + rolling means over
+{15,30,60} days.
+• Experiment 3: Operational context + {D−1,D−7} lags + rolling mean over {7} days.
+A.3 Metric Definitions
+For reference, we restate the metrics used for evaluation on the held-out test month:
+MAE=E[|ˆy−y|],
+Mean Bias = E[ˆy−y],
+RMSE =
+E[(ˆy − y)2],
+Under-Prediction Rate = #{ˆy < y}
+N .
+Here, ˆy is predicted and y is actual value
+A.4 Notes on Practical Implementation
+All features are computed using only information available up to the prediction date to avoid leakage.
+Temporal features (lags and rolling means) are computed independently for each station–window
+rank segment. When segments have insufficient history, rolling features are computed only when the
+required lookback window is available, otherwise the observation is excluded from model training
+for that feature configuration.
+
+Page 8 of 11
+B Diagnostic Plots
+This appendix summarises key diagnostic plots used to evaluate model behaviour beyond aggregate
+metrics. Each figure includes a brief interpretation focused on operational risk and decision usability.
+B.1 Overall Error Distribution
+Figure 1: Overall error distribution on the test set. Error is defined as ˆy− y.
+This histogram represents the distribution of prediction errors across all test observations, where error
+is defined as predicted activation rate minus actual activation rate.
+Key observations: Errors are centred close to zero, indicating good overall calibration. The
+distribution is slightly skewed toward positive values, suggesting marginal over-prediction on average.
+Alonger left tail indicates the presence of occasional large under-predictions.
+Interpretation: The model performs reliably under normal operating conditions, producing an error
+of ±0.18 activation rate for 95% of the test samples. However, when errors do occur, they are more
+likely to be severe under-estimates than over-estimates. These under-predictions represent the highest
+operational risk and should be mitigated through additional safeguards (e.g., buffers, escalation rules)
+rather than model retraining alone.
+B.2 Error Distribution by Rank (Captain vs First Officer)
+Figure 2 compares the error distributions for Captains (CP) and First Officers (FO).
+Key observations: Error distributions for CP and FO largely overlap, indicating no strong systematic
+bias by rank. First Officers show slightly higher variance and a marginally heavier under-prediction
+tail. Captains exhibit more stable and concentrated error patterns.
+Interpretation: The model treats both ranks consistently, supporting the use of a unified prediction
+model. However, First Officer activation risk appears marginally more volatile, suggesting FO
+planning may benefit from a small additional buffer to account for higher uncertainty.
+B.3 Actual vs Predicted Activation Rate
+Scatter plot 3 compares actual activation rates with model predictions, with the diagonal representing
+perfect prediction.
+Key observations: Predictions follow a clear upward trend, confirming that the model has learned
+underlying activation dynamics. Predictions cluster around historical averages. High activation rate
+scenarios are systematically under-predicted, while very low activation rates are over-predicted.
+
+Page 9 of 11
+Figure 2: Error distribution by rank (CP vs FO) on the test set.
+Figure 3: Actual vs predicted activation rate on the test set. The diagonal indicates perfect prediction.
+IndiGo Restricted
+Page 10 of 11
+Interpretation: The model provides strong baseline forecasts for typical activation behaviour.
+However, it exhibits regression-to-the-mean behaviour, limiting responsiveness to extreme activation
+scenarios. For unusually high activation days, model outputs should be complemented with risk-aware
+adjustments (e.g., caps/floors, window-specific buffers, exception rules). It is observed that 58%
+of predicted crew standby activation rates exceed actual values indicating a slight over-prediction
+tendency, with implications for higher standby provisioning and associated operational overhead.
+B.4 Error Distribution by Duty Window
+Figure 4: Prediction error distribution segmented by duty window (boxplot).
+This boxplot illustrates prediction errors segmented by duty window.
+Key observations: Early duty windows show the highest variance and the most severe under
+prediction outliers. Mid-day duty windows have tight error distributions and minimal bias. Late or
+red-eye duty windows display moderate variance and a tendency toward under-prediction.
+Interpretation: Operational risk varies significantly across duty windows. Early-morning duties
+represent the highest risk segment and require additional contingency planning. Mid-day duties are
+well-modelled and can rely more directly on model outputs. Late-night duties warrant moderate
+caution due to elevated uncertainty.
+
+Page 11 of 1
