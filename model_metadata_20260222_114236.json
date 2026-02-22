@@ -1,0 +1,149 @@
+{
+  "features_used": [
+    "Activation Rate MA7",
+    "Standby Activation Count",
+    "AR_AboveMean_Flag",
+    "Pairing Start Count MA7",
+    "Pairing Start Count",
+    "Year",
+    "Pairing Start Count Vol7",
+    "INT Pairing Ratio",
+    "Month Number",
+    "Multi-Day Pairing Ratio",
+    "Duty Window Number",
+    "Activation Rate Vol7",
+    "is_payday_proximity",
+    "Season",
+    "Multi-Day Pairing Count"
+  ],
+  "metrics_cv_train": {
+    "MAE": 0.018669834719272353,
+    "RMSE": 0.03334998791062943,
+    "Bias": -0.004191192539445374,
+    "Under-Pred": 0.5282304526748971
+  },
+  "metrics_val": {
+    "MAE": 0.012036426284095717,
+    "RMSE": 0.03199720373765727,
+    "Bias": -0.0010605624289331977,
+    "Under-Pred": 0.4596774193548387
+  },
+  "metrics_test": {
+    "MAE": 0.007276485948251146,
+    "RMSE": 0.016267763524789095,
+    "Bias": 0.0005047984899690424,
+    "Under-Pred": 0.43333333333333335
+  },
+  "dataset_info": {
+    "train_samples": 7295,
+    "val_samples": 744,
+    "test_samples": 720,
+    "features_count": 15,
+    "date_range": "2024-01-01 00:00:00 to 2025-12-31 00:00:00"
+  },
+  "model_params": {
+    "objective": "reg:squarederror",
+    "base_score": null,
+    "booster": null,
+    "callbacks": null,
+    "colsample_bylevel": null,
+    "colsample_bynode": null,
+    "colsample_bytree": 0.8,
+    "device": null,
+    "early_stopping_rounds": null,
+    "enable_categorical": false,
+    "eval_metric": null,
+    "feature_types": null,
+    "feature_weights": null,
+    "gamma": null,
+    "grow_policy": null,
+    "importance_type": null,
+    "interaction_constraints": null,
+    "learning_rate": 0.08,
+    "max_bin": null,
+    "max_cat_threshold": null,
+    "max_cat_to_onehot": null,
+    "max_delta_step": null,
+    "max_depth": 6,
+    "max_leaves": null,
+    "min_child_weight": null,
+    "missing": NaN,
+    "monotone_constraints": null,
+    "multi_strategy": null,
+    "n_estimators": 400,
+    "n_jobs": -1,
+    "num_parallel_tree": null,
+    "random_state": 42,
+    "reg_alpha": null,
+    "reg_lambda": 1.0,
+    "sampling_method": null,
+    "scale_pos_weight": null,
+    "subsample": 0.8,
+    "tree_method": null,
+    "validate_parameters": null,
+    "verbosity": 0
+  },
+  "feature_importance": [
+    {
+      "Feature": "AR_AboveMean_Flag",
+      "Importance": 0.3826674222946167
+    },
+    {
+      "Feature": "Standby Activation Count",
+      "Importance": 0.31378844380378723
+    },
+    {
+      "Feature": "Pairing Start Count",
+      "Importance": 0.09228622168302536
+    },
+    {
+      "Feature": "Activation Rate Vol7",
+      "Importance": 0.07947345823049545
+    },
+    {
+      "Feature": "Activation Rate MA7",
+      "Importance": 0.06747041642665863
+    },
+    {
+      "Feature": "Pairing Start Count MA7",
+      "Importance": 0.01833316683769226
+    },
+    {
+      "Feature": "Duty Window Number",
+      "Importance": 0.016997480764985085
+    },
+    {
+      "Feature": "Multi-Day Pairing Count",
+      "Importance": 0.005260762292891741
+    },
+    {
+      "Feature": "Month Number",
+      "Importance": 0.004602354951202869
+    },
+    {
+      "Feature": "Multi-Day Pairing Ratio",
+      "Importance": 0.004285156261175871
+    },
+    {
+      "Feature": "INT Pairing Ratio",
+      "Importance": 0.0041266237385571
+    },
+    {
+      "Feature": "Year",
+      "Importance": 0.003942153416574001
+    },
+    {
+      "Feature": "is_payday_proximity",
+      "Importance": 0.00299687753431499
+    },
+    {
+      "Feature": "Pairing Start Count Vol7",
+      "Importance": 0.002737495582550764
+    },
+    {
+      "Feature": "Season",
+      "Importance": 0.0010318760760128498
+    }
+  ],
+  "timestamp": "2026-02-22T11:42:36.112423"
+}
